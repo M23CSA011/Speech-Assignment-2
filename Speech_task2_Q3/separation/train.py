@@ -81,7 +81,7 @@ class Separation(sb.Brain):
         should_step = (self.step % self.grad_accumulation_factor) == 0
 
         # Unpacking batch list
-        mixture = batch["mixed_audio"]
+        mixture = batch["mixed_audio"].squeeze(0)
         targets = [batch["source_1"], batch["source_2"]]
 
         if self.hparams.num_spks == 3:
@@ -198,14 +198,14 @@ class Separation(sb.Brain):
                 # if we do not use the reducelronplateau, we do not change the lr
                 current_lr = self.hparams.optimizer.optim.param_groups[0]["lr"]
 
-            # self.hparams.train_logger.log_stats(
-            #     stats_meta={"epoch": epoch, "lr": current_lr},
-            #     train_stats=self.train_stats,
-            #     valid_stats=stage_stats,
-            # )
-            # self.checkpointer.save_and_keep_only(
-            #     meta={"si-snr": stage_stats["si-snr"]}, min_keys=["si-snr"]
-            # )
+            self.hparams.train_logger.log_stats(
+                stats_meta={"epoch": epoch, "lr": current_lr},
+                train_stats=self.train_stats,
+                valid_stats=stage_stats,
+            )
+            self.checkpointer.save_and_keep_only(
+                meta={"si-snr": stage_stats["si-snr"]}, min_keys=["si-snr"]
+            )
 
     def add_speed_perturb(self, targets):
         """Adds speed perturbation and random_shift to the input signals"""
@@ -453,7 +453,6 @@ if __name__ == "__main__":
     split_idx = int(0.7 * len(file_names))
 
     train_file_names = file_names[:split_idx]
-    train_file_names = train_file_names[:9]
     test_file_names = file_names[split_idx:]
 
     # Create datasets
@@ -488,6 +487,6 @@ if __name__ == "__main__":
     separator.evaluate(test_dataset, min_key="si-snr")
     separator.save_results(test_dataset)
 
-    model_state = {key: module.state_dict() for key, module in separator.modules.items()}
-    torch.save(model_state, os.path.join(hparams["output_folder"], "trained_separator.pth"))
+    # model_state = {key: module.state_dict() for key, module in separator.modules.items()}
+    # torch.save(model_state, os.path.join(hparams["output_folder"], "trained_separator.pth"))
 
