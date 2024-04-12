@@ -1169,10 +1169,9 @@ def collate_fn(batch):
 
     return padded_batch
 
-mix_both_dir = "/content/LibriMix/wav8k/max/test/mix_both"
-s1_dir = " /content/LibriMix/wav8k/max/test/s1"
-s2_dir = " /content/LibriMix/wav8k/max/test/s2"
-
+mix_both_dir = "content/LibriMix/wav8k/max/test/mix_both"
+s1_dir =  "content/LibriMix/wav8k/max/test/s1"
+s2_dir = "content/LibriMix/wav8k/max/test/s2"
 
 
 file_names = os.listdir(mix_both_dir)
@@ -1198,8 +1197,8 @@ else:
 
 def evaluate_model(model,dataloader,device):
   model.eval()
-  sdr_metric = ScaleInvariantSignalDistortionRatio()
-  sisnri_metric = ScaleInvariantSignalNoiseRatio()
+  sdr_metric = ScaleInvariantSignalDistortionRatio().to(device)
+  sisnri_metric = ScaleInvariantSignalNoiseRatio().to(device)
   with torch.no_grad():
     for batch in tqdm_module.tqdm(dataloader):
       for sample in batch:
@@ -1217,11 +1216,13 @@ def evaluate_model(model,dataloader,device):
     sisnri_score = sisnri_metric.compute()
     return sdr_score,sisnri_score
 
-model = separator.from_hparams(source="speechbrain/sepformer-whamr", savedir='pretrained_models/sepformer-whamr')
+model = separator.from_hparams(source="speechbrain/sepformer-whamr", savedir='pretrained_models/sepformer-whamr', run_opts={"device":"cuda"})
 
-model = model.to("cuda")
+
+# model = model.cuda()
 
 print(model.device)
+print(torch.cuda.is_available())
 
 sdr_score, sisnri_score = evaluate_model(model,test_dataloader,device)
 
