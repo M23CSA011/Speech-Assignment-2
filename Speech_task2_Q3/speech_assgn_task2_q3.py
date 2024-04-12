@@ -68,5 +68,5 @@ drive.mount('/content/drive')
 
 !pip install -r ../content/Speech_task2_Q3/extra_requirements.txt
 
-!python /content/Speech_task2_Q3/separation/train.py /content/Speech_task2_Q3/separation/hparams/sepformer.yaml --data_folder /content
+!python /content/Speech_task2_Q3/separation/train.py /content/Speech_task2_Q3/separation/hparams/sepformer-customdataset.yaml --data_folder /content
 
